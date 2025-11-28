@@ -7,10 +7,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
+
 RUN npm install
 
 COPY . .
 
+RUN npm run build && npm run db:migrate && npm run create-admin
+
 STOPSIGNAL SIGTERM
+
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+
+CMD ["sh", "-c", "npm run start"]

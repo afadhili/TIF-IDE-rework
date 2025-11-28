@@ -16,7 +16,6 @@ import {
 import { exploreRooms } from "../services/rooms.service";
 import { createActivity } from "../services/users.service";
 
-// Track which sockets are in which files
 const fileConnections = new Map<string, Set<string>>();
 
 export default function fileSocketSetup(io: Server) {

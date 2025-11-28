@@ -3,9 +3,14 @@ import path from "path";
 import fs from "fs";
 
 export const isRunningInDocker = process.env.RUNNING_IN_DOCKER === "true";
-export const projectDir = process.env.HOST_PATH || process.cwd();
+export const projectDir = process.env.PROJECT_DIR || process.cwd();
+
 let docker: Docker;
 let dockerAvailable = false;
+
+console.log(
+  `Project dir resolved as: ${projectDir} (runningInDocker=${isRunningInDocker})`,
+);
 
 const SOCKET_PATHS = [
   "/var/run/docker.sock",
@@ -99,8 +104,14 @@ export async function createRoomContainer(
 ) {
   if (!(await checkDocker())) throw new Error("Docker not available");
 
+  let finalHostPath = hostRoomPath;
+
   if (isRunningInDocker) {
-    hostRoomPath = path.join(projectDir, "src", "rooms", roomId);
+    finalHostPath = path.join(projectDir, "rooms", roomId);
+    console.log(`Running in Docker: using host path ${finalHostPath}`);
+  } else {
+    finalHostPath = path.resolve(hostRoomPath);
+    console.log(`Running locally: using path ${finalHostPath}`);
   }
 
   try {
@@ -114,7 +125,7 @@ export async function createRoomContainer(
       Image: CONTAINER_IMAGE,
       name: `collab-room-${roomId}`,
       HostConfig: {
-        Binds: [`${path.resolve(hostRoomPath)}:${CONTAINER_WORKSPACE}`],
+        Binds: [`${finalHostPath}:${CONTAINER_WORKSPACE}`],
         CapDrop: ["ALL"],
         SecurityOpt: ["no-new-privileges:true"],
         Memory: 512 * 1024 * 1024,

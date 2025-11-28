@@ -1,13 +1,15 @@
 services:
-  tif-ide:
+  tif-ide-rework:
+    container_name: tif-ide
     build: .
     ports:
       - "3000:3000"
     environment:
       - RUNNING_IN_DOCKER=true
+      - PROJECT_DIR=${PWD}
     volumes:
       - .:/app
       - /app/node_modules
+      - ./rooms:/app/rooms
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./src/rooms:/app/src/rooms
     init: true

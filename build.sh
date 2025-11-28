@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# ambil path host sekarang
-CURRENT_DIR=$(pwd)
-
 # Nama image dan tag
 IMAGE_NAME="collab-terminal-image"
 TAG="latest"

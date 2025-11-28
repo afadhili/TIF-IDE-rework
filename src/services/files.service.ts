@@ -1,9 +1,11 @@
 import fs from "fs";
+import path from "path";
 
 export const createFileOrFolder = async (
   pathName: string,
   isFolder: boolean,
 ): Promise<boolean> => {
+  pathName = path.normalize(pathName);
   try {
     if (fs.existsSync(pathName)) {
       return false;

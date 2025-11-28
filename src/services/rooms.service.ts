@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import config from "../config";
 import db from "../db";
-import { roomsTable } from "../db/schema";
+import { contributorsTable, roomsTable } from "../db/schema";
 import { eq, desc } from "drizzle-orm";
 import { activeUsers, User } from "../sockets/rooms.sockets";
 import { createActivity } from "./users.service";
@@ -111,7 +111,9 @@ export const getRoom = async (roomId: string): Promise<Room | null> => {
   }
 };
 
-const exploreDirectory = async (dirPath: string): Promise<FileTree[]> => {
+export const exploreDirectory = async (
+  dirPath: string,
+): Promise<FileTree[]> => {
   const items = await fs.promises.readdir(dirPath);
   const directories: FileTree[] = [];
   const files: FileTree[] = [];
@@ -195,10 +197,20 @@ export const createRoom = async ({
 
 export const deleteRoom = async (roomId: string): Promise<boolean> => {
   try {
-    await db.delete(roomsTable).where(eq(roomsTable.id, roomId));
+    await db
+      .delete(contributorsTable)
+      .where(eq(contributorsTable.roomId, roomId));
+    const deletedRoom = await db
+      .delete(roomsTable)
+      .where(eq(roomsTable.id, roomId))
+      .returning();
+    if (!deletedRoom) {
+      return false;
+    }
     await fs.promises.rmdir(path.join(roomsPath, roomId), { recursive: true });
     return true;
   } catch (error) {
+    console.error(error);
     return false;
   }
 };

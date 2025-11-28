@@ -19,7 +19,6 @@ import morgan from "morgan";
 export const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 
-app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.static(config.staticPath));

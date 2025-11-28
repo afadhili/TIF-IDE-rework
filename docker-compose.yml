@@ -8,7 +8,6 @@ services:
       - RUNNING_IN_DOCKER=true
       - PROJECT_DIR=${PWD}
     volumes:
-      - .:/app
       - /app/node_modules
       - ./rooms:/app/rooms
       - /var/run/docker.sock:/var/run/docker.sock

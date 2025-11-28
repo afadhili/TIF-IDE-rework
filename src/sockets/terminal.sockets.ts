@@ -79,11 +79,9 @@ export async function cleanupSession(sessionKey: string) {
         console.warn(`Failed to end docker stream for ${sessionKey}:`, err);
       }
 
-      // Decrement container counter safely
       const roomId = session.roomId;
       const containerInfo = roomContainers.get(roomId);
       if (containerInfo) {
-        // ensure we don't go negative
         containerInfo.activeSessions = Math.max(
           0,
           containerInfo.activeSessions - 1,
@@ -105,7 +103,6 @@ export async function cleanupSession(sessionKey: string) {
               `Error removing container for room ${roomId}:`,
               error,
             );
-            // still delete map entry to avoid leaking inconsistent state
             roomContainers.delete(roomId);
           }
         }
@@ -149,10 +146,6 @@ export async function cleanupRoomContainer(roomId: string) {
   }
 }
 
-function getSession(sessionKey: string): TerminalSession | undefined {
-  return terminalSessions.get(sessionKey);
-}
-
 async function initializeDockerSession(
   sessionKey: string,
   container: Docker.Container,
@@ -172,19 +165,14 @@ async function initializeDockerSession(
 
   const stream = await exec.start({ hijack: true, stdin: true, Tty: true });
 
-  // initialize shell
   const initCommands = ["export TERM=xterm-256color", "stty -ixon", "clear"];
   try {
-    // If the stream expects raw data, write init
     stream.write(initCommands.join("\n") + "\n");
   } catch (err) {
     console.warn("Unable to write init commands to docker exec stream:", err);
   }
 
-  // stream handlers — these should call cleanupSession which decrements activeSessions
   stream.on("data", (chunk: Buffer) => {
-    // Emit to the specific socket that owns this session.
-    // If you intend to broadcast to all activeUsers, change this to io.to(roomSocketId...).emit
     try {
       socket.emit("terminal-output", chunk.toString());
     } catch (err) {

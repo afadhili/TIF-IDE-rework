@@ -14,7 +14,6 @@ import {
   terminalSessions,
 } from "./sockets/terminal.sockets";
 import config from "./config";
-import morgan from "morgan";
 
 export const PORT = Number(process.env.PORT) || 3000;
 const app = express();

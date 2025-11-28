@@ -8,6 +8,7 @@ import {
   usersTable,
 } from "../db/schema";
 import { onlineUsers } from "../sockets";
+import { io } from "..";
 
 export type UserActivity = InferSelectModel<typeof usersActivityTable>;
 type CreateActivityInput = Pick<
@@ -46,7 +47,7 @@ export const getUsers = async (): Promise<User[] | null> => {
     });
 
     let usersWithStatus = users.map((user) => {
-      const status = onlineUsers.has(user.id) ? "active" : "offline";
+      const status = onlineUsers.has(user.nim) ? "active" : "offline";
       return { ...user, status };
     });
 
@@ -73,7 +74,10 @@ export const getUserById = async (
 
     if (!user) return null;
 
-    return { ...user, status: onlineUsers.has(user.id) ? "active" : "offline" };
+    return {
+      ...user,
+      status: onlineUsers.has(user.nim) ? "active" : "offline",
+    };
   } catch (error) {
     console.error(error);
     return null;
@@ -139,6 +143,9 @@ export const createActivity = async (
         details: data.details ?? "",
       })
       .returning();
+
+    if (activity)
+      io.to("admin").emit("userActivity", { activity: activity[0] });
 
     return activity[0] ?? null;
   } catch (error) {

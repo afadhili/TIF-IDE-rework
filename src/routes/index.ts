@@ -9,6 +9,7 @@ const router = Router();
 
 router.use("/rooms", authMiddleware, roomsRouter);
 router.use("/users", usersRouter);
+router.use("/admin", authMiddleware);
 router.use("/admin", adminMiddleware, adminRouter);
 
 export default router;

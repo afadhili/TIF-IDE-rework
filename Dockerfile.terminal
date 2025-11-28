@@ -1,0 +1,42 @@
+# Dockerfile
+FROM ubuntu:22.04
+
+# Install basic tools dan programming languages
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    nano \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Install Python
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
+# Install C/C++ compiler
+RUN apt-get install -y g++ gcc
+
+# Install Java (optional)
+RUN apt-get install -y openjdk-11-jdk
+
+# Install additional tools
+RUN apt-get install -y \
+    bash \
+    procps \
+    htop \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create workspace directory
+RUN mkdir -p /workspace
+WORKDIR /workspace
+
+# Set up default shell dengan environment yang proper
+SHELL ["/bin/bash", "-l", "-c"]
+CMD ["/bin/bash", "-l"]

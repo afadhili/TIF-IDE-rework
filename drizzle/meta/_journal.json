@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1764156888899,
+      "tag": "0000_strong_vivisector",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1764176281692,
+      "tag": "0001_orange_thundra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1764176855051,
+      "tag": "0002_green_toro",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1764251039985,
+      "tag": "0003_motionless_secret_warriors",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1764255123196,
+      "tag": "0004_supreme_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1764258969153,
+      "tag": "0005_married_vulture",
+      "breakpoints": true
+    }
+  ]
+}

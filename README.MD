@@ -1,4 +1,5 @@
 # TIF-IDE: Collaborative Web-based IDE
+![Open Source](https://img.shields.io/badge/Open%20Source-Yes-green?style=flat-square)
 
 A collaborative, web-based Integrated Development Environment (IDE) built with Node.js, Express, Socket.IO, and Docker. This platform allows multiple users to collaborate in real-time on coding projects with a shared terminal environment.
 
@@ -183,11 +184,13 @@ The integrated terminal supports:
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+We welcome contributions to the TIF-IDE project! Here's how you can help:
+
+1.  **Fork** the repository.
+2.  Create your **feature branch** (`git checkout -b feature/AmazingFeature`).
+3.  **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push** to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a **Pull Request**.
 
 ## License
 

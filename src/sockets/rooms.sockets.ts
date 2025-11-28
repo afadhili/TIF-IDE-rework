@@ -125,7 +125,6 @@ export default function roomSocketsSetup(io: Server) {
         }
         const updatedUsers = activeUsers.get(roomId);
 
-        // Emit to all users in the room including the one joining
         io.to(roomId).emit("activeUsers", updatedUsers);
         io.to(roomId).emit("roomJoined", {
           roomId,
@@ -177,7 +176,6 @@ export default function roomSocketsSetup(io: Server) {
 
       socket.on("giveAccess", async ({ room, userId }, callback) => {
         const roomId = room.id;
-        console.log(room);
         try {
           if (!roomId || !userId) {
             if (typeof callback === "function") {

@@ -1,9 +1,20 @@
 import Docker from "dockerode";
 import path from "path";
 import fs from "fs";
+import config from "../config"
 
 export const isRunningInDocker = process.env.RUNNING_IN_DOCKER === "true";
 export const projectDir = process.env.PROJECT_DIR || process.cwd();
+
+let roomsPath = config.roomsPath;
+if (process.env.PROJECT_DIR && process.env.ROOMS_PATH) {
+  if (!path.isAbsolute(process.env.ROOMS_PATH)) {
+    roomsPath = path.join(process.env.PROJECT_DIR, path.normalize(process.env.ROOMS_PATH));
+  } else {
+    roomsPath = path.normalize(process.env.ROOMS_PATH);
+  }
+  console.log("Rooms path resolved as: ", roomsPath);
+}
 
 let docker: Docker;
 let dockerAvailable = false;
@@ -75,7 +86,7 @@ export async function ensureDockerImage() {
 
     return new Promise((resolve, reject) => {
       docker.buildImage(
-        { context: process.cwd(), src: ["Dockerfile"] },
+        { context: process.cwd(), src: ["Dockerfile.terminal"] },
         { t: CONTAINER_IMAGE },
         (err, stream) => {
           if (err) return reject(err);
@@ -107,11 +118,9 @@ export async function createRoomContainer(
   let finalHostPath = hostRoomPath;
 
   if (isRunningInDocker) {
-    finalHostPath = path.join(projectDir, "rooms", roomId);
-    console.log(`Running in Docker: using host path ${finalHostPath}`);
+    finalHostPath = path.join(roomsPath, roomId);
   } else {
     finalHostPath = path.resolve(hostRoomPath);
-    console.log(`Running locally: using path ${finalHostPath}`);
   }
 
   try {
@@ -148,6 +157,7 @@ export async function createRoomContainer(
         "LANG=C.UTF-8",
         "LC_ALL=C.UTF-8",
       ],
+      NetworkDisabled: true,
     });
 
     await container.start();
@@ -170,7 +180,6 @@ export async function removeRoomContainer(roomId: string) {
   }
 }
 
-// KEY FIX: Demultiplex Docker stream
 function demuxDockerStream(
   stream: any,
   onStdout: Function,
@@ -187,14 +196,12 @@ function demuxDockerStream(
       const payloadLength = header.readUInt32BE(4);
 
       if (buffer.length < 8 + payloadLength) {
-        // Not enough data yet, wait for more
         break;
       }
 
       const payload = buffer.slice(8, 8 + payloadLength);
       buffer = buffer.slice(8 + payloadLength);
 
-      // streamType: 0=stdin, 1=stdout, 2=stderr
       if (streamType === 1 && onStdout) {
         onStdout(payload);
       } else if (streamType === 2 && onStderr) {
@@ -220,12 +227,9 @@ export async function execInContainer(container: any, socket: any) {
 
     const stream = await exec.start({ hijack: true, stdin: true, Tty: true });
 
-    // Send initialization commands
     stream.write("export TERM=xterm-256color\n");
     stream.write("stty -ixon\n");
     stream.write("clear\n");
-
-    // KEY FIX: When Tty: true, stream is NOT multiplexed - just pipe it directly
     stream.on("data", (chunk: Buffer) => {
       socket.emit("terminal-output", chunk);
     });

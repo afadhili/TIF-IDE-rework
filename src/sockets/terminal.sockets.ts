@@ -15,10 +15,6 @@ import {
   CONTAINER_WORKSPACE,
 } from "../services/docker.service";
 
-// ========================
-// TYPE DEFINITIONS
-// ========================
-
 interface TerminalSession {
   roomId: string;
   activeUsers: Set<string>;
@@ -37,42 +33,28 @@ interface DockerTerminalSession extends TerminalSession {
   stream: any;
 }
 
-// Map untuk menyimpan sesi terminal per user (key: `${roomId}-${userId}`)
 type TerminalSessionMap = Map<
   string,
   LocalTerminalSession | DockerTerminalSession
 >;
 
-// Map untuk menyimpan container per room (key: roomId)
 interface RoomContainerInfo {
   container: Docker.Container;
   hostRoomPath: string;
-  activeSessions: number; // Jumlah sesi aktif dalam container ini
+  activeSessions: number;
 }
-
-// ========================
-// SESSION & CONTAINER MANAGEMENT
-// ========================
 
 export const terminalSessions: TerminalSessionMap = new Map();
 export const roomContainers = new Map<string, RoomContainerInfo>();
 
-/**
- * Cleanup a single session. Idempotent and async.
- * - Removes session from terminalSessions map immediately to avoid races.
- * - For docker sessions, attempts to end stream and decrements the container counter.
- * - If container counter reaches 0, removeRoomContainer is awaited and roomContainers entry deleted.
- */
 export async function cleanupSession(sessionKey: string) {
   const session = terminalSessions.get(sessionKey);
-  if (!session) return; // already cleaned
+  if (!session) return; 
 
-  // Remove immediately to avoid double-cleanup races
   terminalSessions.delete(sessionKey);
 
   try {
     if (session.type === "docker") {
-      // End the stream politely (best-effort)
       try {
         session.stream?.end?.();
       } catch (err) {
@@ -86,18 +68,11 @@ export async function cleanupSession(sessionKey: string) {
           0,
           containerInfo.activeSessions - 1,
         );
-        console.log(
-          `Decremented activeSessions for room ${roomId}: ${containerInfo.activeSessions}`,
-        );
 
         if (containerInfo.activeSessions <= 0) {
           try {
-            console.log(
-              `No active sessions left for room ${roomId}, removing container...`,
-            );
             await removeRoomContainer(roomId);
             roomContainers.delete(roomId);
-            console.log(`Container for room ${roomId} removed`);
           } catch (error) {
             console.error(
               `Error removing container for room ${roomId}:`,
@@ -265,10 +240,6 @@ function initializeLocalSession(
     workingDirectory: workingDir,
   };
 }
-
-// ========================
-// COMMAND EXECUTION
-// ========================
 
 const LANGUAGE_COMMANDS: Record<string, (filePath: string) => string> = {
   java: (file) =>

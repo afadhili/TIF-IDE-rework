@@ -207,7 +207,7 @@ export const deleteRoom = async (roomId: string): Promise<boolean> => {
     if (!deletedRoom) {
       return false;
     }
-    await fs.promises.rmdir(path.join(roomsPath, roomId), { recursive: true });
+    await fs.promises.rm(path.join(roomsPath, roomId), { recursive: true });
     return true;
   } catch (error) {
     console.error(error);

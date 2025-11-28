@@ -5,14 +5,10 @@ import {
   getRooms,
   isRoomExists,
 } from "../services/rooms.service";
-import { zip, COMPRESSION_LEVEL } from "zip-a-folder";
+import { zip } from "zip-a-folder";
 import config from "../config";
 import path from "path";
 import fs from "fs";
-import db from "../db";
-import { eq } from "drizzle-orm";
-import { usersTable } from "../db/schema";
-import { createActivity } from "../services/users.service";
 
 const router = Router();
 
@@ -49,13 +45,18 @@ router.get("/download/:roomId", async (req: Request, res: Response) => {
     const { roomId } = req.params;
     const user = (req as any).user;
 
+    const downloadPath = path.join(config.staticPath, "downloads");
+    if (!fs.existsSync(downloadPath)) {
+      fs.mkdirSync(downloadPath);
+    }
+
     if (!user) {
       console.error("No user on req");
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const roomPath = path.join(config.roomsPath, roomId);
-    const zipPath = path.join(config.staticPath, "downloads", `${roomId}.zip`);
+    const zipPath = path.join(downloadPath, `${roomId}.zip`);
 
     if (!fs.existsSync(roomPath)) {
       return res.status(404).json({ error: "Room not found" });

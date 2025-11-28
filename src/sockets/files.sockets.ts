@@ -16,7 +16,11 @@ import {
 import { exploreRooms } from "../services/rooms.service";
 import { createActivity } from "../services/users.service";
 
-const fileConnections = new Map<string, Set<string>>();
+import chokidar from "chokidar";
+import config from "../config";
+import path from "path";
+
+export const fileConnections = new Map<string, Set<string>>();
 
 export default function fileSocketSetup(io: Server) {
   io.on("connection", (socket: Socket) => {
@@ -28,17 +32,15 @@ export default function fileSocketSetup(io: Server) {
       if (result) {
         const fileId = file.path.replaceAll("\\", "_").replaceAll("/", "_");
 
-        io.to(fileId).emit("fileRemoved", file);
-
         cleanupYDoc(fileId);
         fileConnections.delete(fileId);
 
-        io.to(roomId).emit("fileTree", await exploreRooms(roomId));
         io.to(roomId).emit("removedFile", file);
+
         await createActivity({
           userId: user.id,
           type: "file_delete",
-          description: `Deleted file ${file.name} from room ${roomId}`,
+          description: `Deleted ${file.type} ${file.name} from room ${roomId}`,
           details: JSON.stringify({
             user: `${user.name} | ${user.nim}`,
             type: file.type === "directory" ? "directory" : "file",
@@ -56,8 +58,8 @@ export default function fileSocketSetup(io: Server) {
           callback({ success: result });
         }
         if (result) {
-          io.to(roomId).emit("fileTree", await exploreRooms(roomId));
           io.to(roomId).emit("renamedFile", { oldPath: file.path, newPath });
+
           await createActivity({
             userId: user.id,
             type: "file_update",
@@ -207,5 +209,51 @@ export default function fileSocketSetup(io: Server) {
         }
       });
     });
+  });
+  chokidarInit(io);
+}
+
+
+function chokidarInit(io: Server) {
+  const roomsPath = config.roomsPath;
+  const watcher = chokidar.watch(roomsPath, {
+    persistent: true,
+    ignoreInitial: true,
+  });
+
+  watcher.on("all", async (event, p) => {
+    const relativePath = path.relative(roomsPath, p);
+    const parts = relativePath.split(path.sep);
+    const roomId = parts[0];
+    const filePath = parts.slice(1).join("/");
+
+    if (p.endsWith(roomId)) {
+      return;
+    };
+
+    if (event === "add" || event === "addDir") {
+      if (roomId && filePath) {
+        io.to(roomId).emit("fileTree", await exploreRooms(roomId));
+      }
+    }
+
+    if (event === "unlink" || event === "unlinkDir") {
+      const fileType = event === "unlink" ? "file" : "directory";
+      const fileName = path.basename(filePath);
+      const fileId = p.replaceAll("\\", "_").replaceAll("/", "_");
+
+      const file = {
+        name: fileName,
+        type: fileType,
+        path: p,
+        children: [],
+      }
+
+      cleanupYDoc(fileId);
+      fileConnections.delete(fileId);
+
+      io.to(roomId).emit("fileTree", await exploreRooms(roomId));
+      io.to(roomId).emit("removedFile", file);
+    }
   });
 }

@@ -6,15 +6,13 @@ import config from "../config"
 export const isRunningInDocker = process.env.RUNNING_IN_DOCKER === "true";
 export const projectDir = process.env.PROJECT_DIR || process.cwd();
 
-let roomsPath = config.roomsPath;
-if (process.env.PROJECT_DIR && process.env.ROOMS_PATH) {
-  if (!path.isAbsolute(process.env.ROOMS_PATH)) {
-    roomsPath = path.join(process.env.PROJECT_DIR, path.normalize(process.env.ROOMS_PATH));
-  } else {
-    roomsPath = path.normalize(process.env.ROOMS_PATH);
-  }
-  console.log("Rooms path resolved as: ", roomsPath);
+function sanitizeEnvPath(p?: string) {
+  if (!p) return undefined;
+  p = p.trim().replace(/^["']|["']$/g, "");
+  return p;
 }
+
+let roomsPath = process.env.ROOMS_PATH || config.roomsPath;
 
 let docker: Docker;
 let dockerAvailable = false;
@@ -22,6 +20,7 @@ let dockerAvailable = false;
 console.log(
   `Project dir resolved as: ${projectDir} (runningInDocker=${isRunningInDocker})`,
 );
+console.log(`Rooms path resolved as: ${roomsPath}`)
 
 const SOCKET_PATHS = [
   "/var/run/docker.sock",

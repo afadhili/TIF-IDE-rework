@@ -219,7 +219,17 @@ function chokidarInit(io: Server) {
   const watcher = chokidar.watch(roomsPath, {
     persistent: true,
     ignoreInitial: true,
+    usePolling: process.env.RUNNING_IN_DOCKER === "true",
+    interval: process.env.RUNNING_IN_DOCKER === "true" ? 1000 : 100,
+    binaryInterval: process.env.RUNNING_IN_DOCKER === "true" ? 1000 : 300,
+    awaitWriteFinish: {
+      stabilityThreshold: 2000,
+      pollInterval: 100,
+    },
   });
+
+  watcher.on("ready", () => console.log("Chokidar ready"));
+  watcher.on("error", (err) => console.error("Chokidar error:", err));
 
   watcher.on("all", async (event, p) => {
     const relativePath = path.relative(roomsPath, p);

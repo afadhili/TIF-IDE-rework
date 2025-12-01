@@ -123,12 +123,14 @@ export const exploreDirectory = async (
     const stats = await fs.promises.stat(itemPath);
 
     if (stats.isDirectory()) {
-      directories.push({
-        name: item,
-        type: "directory",
-        path: itemPath,
-        children: await exploreDirectory(itemPath),
-      });
+      if (!(item === ".git")) {
+        directories.push({
+          name: item,
+          type: "directory",
+          path: itemPath,
+          children: await exploreDirectory(itemPath),
+        });
+      }
     } else {
       if (!(item.endsWith(".class") || item.endsWith(".exe"))) {
         files.push({

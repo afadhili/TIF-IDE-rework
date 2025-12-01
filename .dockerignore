@@ -1,7 +1,7 @@
 node_modules
 dist
 .git
-Dockerfile
+Dockerfile*
 docker-compose.yml
+**/*.db
 *.db
-database.db

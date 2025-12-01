@@ -10,16 +10,15 @@ export async function authMiddleware(
   next: NextFunction,
 ) {
   try {
-    const authHeader = req.header("Authorization");
+    const { token } = req.cookies;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized - No token provided",
+        message: "Unauthorized - No token.",
       });
     }
 
-    const token = authHeader.substring(7);
     const payload = verifyToken(token);
 
     if (!payload?.nim) {
@@ -38,7 +37,7 @@ export async function authMiddleware(
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized - Invalid token",
+        message: "Unauthorized - Invalid token.",
       });
     }
 

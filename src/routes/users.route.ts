@@ -47,17 +47,11 @@ router.post("/signin", async (req: Request, res: Response) => {
           }),
         });
 
+        res.cookie("token", token);
+
         return res.json({
           success: true,
           message: "User Exists",
-          token,
-          user: {
-            id: user.id,
-            nim: user.nim,
-            name: user.name,
-            role: user.role,
-            contributors: user.contributors,
-          },
         });
       }
     }
@@ -146,35 +140,15 @@ router.post("/logout", authMiddleware, async (req: Request, res: Response) => {
     }),
   });
 
+  res.clearCookie("token");
+
   return res.json({
     success: true,
     message: "User logged out successfully",
   });
 });
 
-router.post(
-  "/activity",
-  authMiddleware,
-  async (req: Request, res: Response) => {
-    const activity = (req as any).user;
-    await createActivity(activity);
-
-    return res.json({
-      success: true,
-      message: "Activity logged successfully",
-    });
-  },
-);
-
-router.all("/verify", authMiddleware, async (req: Request, res: Response) => {
-  const user = (req as any).user;
-  return res.json({
-    success: true,
-    user,
-  });
-});
-
-router.get("/me", authMiddleware, async (req: Request, res: Response) => {
+router.all("/me", authMiddleware, async (req: Request, res: Response) => {
   const user = (req as any).user;
   return res.json({
     success: true,

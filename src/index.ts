@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import http from "http";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import { Server as SocketIOServer } from "socket.io";
 
 import routes from "./routes";
@@ -18,11 +20,12 @@ import config from "./config";
 export const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.static(config.staticPath));
 
-app.use("/api", routes);
+app.use("/api", morgan("common"), routes);
 
 app.use((req, res) => {
   res.sendFile(path.join(config.staticPath, "index.html"));
@@ -33,7 +36,7 @@ const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {
   path: "/socket.io",
   cors: {
-    origin: "*",
+    origin: true,
     methods: ["GET", "POST"],
     credentials: true,
   },

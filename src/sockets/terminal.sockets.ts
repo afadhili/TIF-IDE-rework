@@ -9,7 +9,6 @@ import {
   checkDocker,
   createRoomContainer,
   ensureDockerImage,
-  execCommandInContainer,
   removeRoomContainer,
   dockerAvailable,
   CONTAINER_WORKSPACE,
@@ -273,35 +272,14 @@ function getRunCommand(
 async function executeFileInContainer(
   session: DockerTerminalSession,
   command: string,
-  roomId: string,
   socket: Socket,
 ) {
   socket.emit(
     "terminal-output",
-    `\r\n\x1b[36mᐅ Running: ${command}\x1b[0m\r\n`,
+    `\r\n\x1b[36mᐅ Running: \x1b[0m\r\n`,
   );
 
-  await execCommandInContainer(
-    session.container,
-    command,
-    (data: Buffer) => {
-      try {
-        socket.emit("terminal-output", data.toString());
-      } catch (e) {
-        console.warn("Error emitting exec data to socket:", e);
-      }
-    },
-    () =>
-      socket.emit(
-        "terminal-output",
-        "\r\n\x1b[32m✅ Execution completed\x1b[0m\r\n",
-      ),
-    (err: Error) =>
-      socket.emit(
-        "terminal-output",
-        `\r\n\x1b[31m❌ Execution failed: ${err.message}\x1b[0m\r\n`,
-      ),
-  );
+  session.stream.write(`${command}\n`);
 }
 
 function executeFileLocally(
@@ -311,8 +289,9 @@ function executeFileLocally(
 ) {
   socket.emit(
     "terminal-output",
-    `\r\n\x1b[36mᐅ Running: ${command}\x1b[0m\r\n`,
+    `\r\n\x1b[36mᐅ Running: \x1b[0m\r\n`,
   );
+  
   session.ptyProcess.write(`${command}\n`);
 }
 
@@ -487,7 +466,6 @@ export default function ptyTerminalSocketSetup(io: Server) {
             await executeFileInContainer(
               session as DockerTerminalSession,
               command,
-              roomId,
               socket,
             );
           } else {

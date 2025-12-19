@@ -132,13 +132,11 @@ export const exploreDirectory = async (
         });
       }
     } else {
-      if (!(item.endsWith(".class") || item.endsWith(".exe"))) {
-        files.push({
-          name: item,
-          type: "file",
-          path: itemPath,
-        });
-      }
+      files.push({
+        name: item,
+        type: "file",
+        path: itemPath,
+      });
     }
   }
 

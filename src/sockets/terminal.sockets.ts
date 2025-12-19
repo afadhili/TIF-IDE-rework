@@ -48,7 +48,7 @@ export const roomContainers = new Map<string, RoomContainerInfo>();
 
 export async function cleanupSession(sessionKey: string) {
   const session = terminalSessions.get(sessionKey);
-  if (!session) return; 
+  if (!session) return;
 
   terminalSessions.delete(sessionKey);
 
@@ -274,10 +274,7 @@ async function executeFileInContainer(
   command: string,
   socket: Socket,
 ) {
-  socket.emit(
-    "terminal-output",
-    `\r\n\x1b[36mᐅ Running: \x1b[0m\r\n`,
-  );
+  socket.emit("terminal-output", `\r\n\x1b[36mᐅ Running: \x1b[0m\r\n`);
 
   session.stream.write(`${command}\n`);
 }
@@ -287,11 +284,8 @@ function executeFileLocally(
   command: string,
   socket: Socket,
 ) {
-  socket.emit(
-    "terminal-output",
-    `\r\n\x1b[36mᐅ Running: \x1b[0m\r\n`,
-  );
-  
+  socket.emit("terminal-output", `\r\n\x1b[36mᐅ Running: \x1b[0m\r\n`);
+
   session.ptyProcess.write(`${command}\n`);
 }
 

@@ -1,5 +1,7 @@
 # TIF-IDE: Collaborative Web-based IDE
+
 ![Open Source](https://img.shields.io/badge/Open%20Source-Yes-green?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
 A collaborative, web-based Integrated Development Environment (IDE) built with Node.js, Express, Socket.IO, and Docker. This platform allows multiple users to collaborate in real-time on coding projects with a shared terminal environment.
 
@@ -45,13 +47,7 @@ npm install
 ```
 
 3. Set up environment variables:
-   Create a `.env` file in the server directory with the following variables:
-
-```env
-DATABASE_URL=db.sqlite
-JWT_SECRET=your_jwt_secret_key
-PORT=3000
-```
+   Copy `.env.example` to `.env` and update the values as needed.
 
 4. Run database migrations:
 
@@ -181,28 +177,3 @@ The integrated terminal supports:
 - Direct code execution within the IDE
 - Full bash shell environment in Docker containers
 - Real-time collaboration in terminal sessions
-
-## Contributing
-
-We welcome contributions to the TIF-IDE project! Here's how you can help:
-
-1.  **Fork** the repository.
-2.  Create your **feature branch** (`git checkout -b feature/AmazingFeature`).
-3.  **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  **Push** to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a **Pull Request**.
-
-## License
-
-This project is licensed under the ISC License.
-
-## Authors
-
-- Built with Node.js, Express, Socket.IO, and Docker
-- Uses Drizzle ORM for database management
-- Features Monaco Editor for code editing
-
-```
-
-This README provides a comprehensive overview of your collaborative IDE project. It covers the key features, technology stack, installation instructions, usage guidelines, API endpoints, and project structure. The document is organized to help both new developers and users understand and use the application effectively.
-```
